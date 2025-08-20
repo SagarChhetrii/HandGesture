@@ -1,0 +1,12 @@
+# Updated to latest Python 3.13.6 compatible versions
+# Note: MediaPipe not compatible with Python 3.13.6 - using OpenCV-based hand tracking instead
+opencv-python==4.12.0.88
+numpy==2.2.6
+Pillow==11.3.0
+# Hand Gesture Virtual Keyboard Requirements
+# Python 3.13.6 compatible versions
+# Note: Using OpenCV-based hand tracking instead of MediaPipe for Python 3.13.6 compatibility
+
+opencv-python==4.12.0.88
+numpy==2.2.6
+Pillow==11.3.0
