@@ -32,6 +32,10 @@ WRIST: int = 0
 # Hand roles
 RIGHT_HAND_LABEL: str = "Right"  # Pointer hand (cursor control)
 LEFT_HAND_LABEL: str = "Left"    # Typing hand (pinch to click)
+SWAP_HANDS: bool = False         # If True, swap pointer/clicker roles
+AUTO_MIRROR_SWAP: bool = True 
+AUTO_MIRROR_SWAP = True   # keep
+SWAP_HANDS = True         # force right=cursor, left=pinch  # If True, swap labels due to camera mirror flip
 
 # Window dimensions
 WINDOW_WIDTH: int = 1400

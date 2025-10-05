@@ -1,6 +1,9 @@
-✋ Hand Gesture Virtual Keyboard v2.1
+✋ Hand Gesture Virtual Keyboard v3.0
 
-A Python-based virtual keyboard that uses two-hand gesture control for typing without a physical keyboard. Built for Python 3.13.6 with OpenCV-based hand tracking.
+A Python-based virtual keyboard that uses two-hand gesture control for typing without a physical keyboard. Supports:
+
+- Python 3.12: Full MediaPipe hand tracking
+- Python 3.13: OpenCV-only fallback (no hand tracking)
 
 🚀 Features
 
@@ -40,7 +43,7 @@ Lightweight & Modern GUI: Built with Tkinter
 
 🛠️ Requirements
 
-Python: 3.13.6 (required)
+Python: 3.12.7 recommended (pinned via `.python-version`)
 
 OS: Windows 10/11, macOS, or Linux
 
@@ -48,27 +51,24 @@ Webcam: For hand tracking
 
 Libraries: See requirements.txt
 
-📦 Installation
-1. Clone Project
-git clone <repository-url>
-cd py
+📦 Quick Start (macOS)
 
-2. Create Virtual Environment
-python -m venv venv
+Option A — Full tracking (recommended):
+```bash
+cd /Users/sagarchhetri/Desktop/HandGesture
+source .venv312/bin/activate
+python -m pip install -r requirements.txt  # if needed
+python main.py
+```
 
-3. Activate Virtual Environment
-
-Windows:
-
-.\venv\Scripts\activate
-
-
-macOS/Linux:
-
-source venv/bin/activate
-
-4. Install Dependencies
-pip install -r requirements.txt
+Option B — Python 3.13 fallback (no tracking):
+```bash
+cd /Users/sagarchhetri/Desktop/HandGesture
+source .venv/bin/activate
+export TK_SILENCE_DEPRECATION=1
+export PKG_CONFIG_PATH=/opt/homebrew/opt/tcl-tk/lib/pkgconfig:${PKG_CONFIG_PATH:-}
+python main.py
+```
 
 🚀 Usage
 
@@ -125,22 +125,17 @@ PINCH_THRESHOLD (adjust pinch sensitivity)
 🔧 Troubleshooting
 
 Webcam not detected
-
-Check camera permissions
-
-Use correct index (0, 1, 2)
+- System Settings → Privacy & Security → Camera → enable for Terminal and Python
+- Ensure no app is using the camera
+- Try indices 0..3 in `config.py`
 
 Hand not detected properly
-
-Improve lighting
-
-Keep background simple
-
-Adjust sensitivity in config
+- Improve lighting and reduce background clutter
+- Keep both hands 1–2 feet from camera
+- Adjust `PINCH_THRESHOLD` in `config.py`
 
 Multiple presses per pinch
-
-Increase debounce delay in config.py
+- Increase `PINCH_DEBOUNCE_TIME` in `config.py`
 
 📁 Project Structure
 py/
@@ -153,7 +148,8 @@ py/
 
 🔄 Updates
 
-✅ Replaced MediaPipe with pure OpenCV (Python 3.13.6 compatible)
+✅ MediaPipe on Python 3.12 (full tracking)
+✅ OpenCV-only fallback on Python 3.13
 
 ✅ Removed extra gestures (fist, palm, peace sign)
 

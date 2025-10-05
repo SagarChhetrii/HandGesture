@@ -71,6 +71,7 @@ class HandGestureKeyboard:
         
         # Threading components
         self.frame_queue: queue.Queue[np.ndarray] = queue.Queue(maxsize=2)
+        self.pinch_queue: queue.Queue[bool] = queue.Queue(maxsize=16)
         self.camera_thread: Optional[threading.Thread] = None
         
         self.setup_gui()
@@ -291,6 +292,13 @@ class HandGestureKeyboard:
         # Start periodic GUI updates
         self.update_display()
 
+        # Visual cursor dot overlay (for debugging/aiming)
+        try:
+            self.cursor_dot = tk.Frame(self.root, bg=CURSOR_DISPLAY_COLOR, width=10, height=10)
+            self.cursor_dot.place(x=WINDOW_WIDTH // 2, y=WINDOW_HEIGHT // 2)
+        except Exception:
+            self.cursor_dot = None
+
     def create_keyboard(self) -> None:
         """Create the virtual keyboard with enhanced styling"""
         # Clear existing keyboard
@@ -361,9 +369,13 @@ class HandGestureKeyboard:
                 # Process frame with MediaPipe hand tracker
                 processed_frame, pinch_detected = self.hand_tracker.process_frame(frame)
                 
-                # Handle pinch detection for key pressing
+                # Handle pinch detection for key pressing (defer to GUI thread)
                 if pinch_detected:
-                    self.handle_pinch_detected()
+                    try:
+                        if not self.pinch_queue.full():
+                            self.pinch_queue.put_nowait(True)
+                    except Exception:
+                        pass
                 
                 # Queue processed frame for GUI display (non-blocking)
                 if not self.frame_queue.full():
@@ -443,6 +455,13 @@ class HandGestureKeyboard:
     def update_display(self) -> None:
         """Main GUI update loop"""
         try:
+            # Drain pinch events and execute on GUI thread
+            while not self.pinch_queue.empty():
+                try:
+                    _ = self.pinch_queue.get_nowait()
+                    self.handle_pinch_detected()
+                except Exception:
+                    break
             # Update camera feed display
             try:
                 frame = self.frame_queue.get_nowait()
@@ -499,6 +518,24 @@ class HandGestureKeyboard:
     def update_cursor_highlighting(self) -> None:
         """Update keyboard key highlighting based on cursor position"""
         cursor_x, cursor_y = self.hand_tracker.get_cursor_position()
+
+        # Cursor from tracker is already in root window coordinates; no extra remap
+
+        # Clamp to root client area
+        try:
+            root_w = max(1, self.root.winfo_width())
+            root_h = max(1, self.root.winfo_height())
+            cursor_x = max(0, min(root_w - 1, cursor_x))
+            cursor_y = max(0, min(root_h - 1, cursor_y))
+        except Exception:
+            pass
+
+        # Move the visible cursor dot overlay
+        if getattr(self, 'cursor_dot', None) is not None:
+            try:
+                self.cursor_dot.place(x=cursor_x - 5, y=cursor_y - 5)
+            except Exception:
+                pass
         
         # Reset all key colors to default
         for key_name, btn in self.key_buttons.items():
@@ -522,7 +559,8 @@ class HandGestureKeyboard:
         for key_name, btn in self.key_buttons.items():
             if btn.winfo_viewable():
                 try:
-                    # Get button absolute position
+                    # Get button absolute position relative to root window
+                    self.root.update_idletasks()
                     btn_x = btn.winfo_rootx() - self.root.winfo_rootx()
                     btn_y = btn.winfo_rooty() - self.root.winfo_rooty()
                     btn_w = btn.winfo_width()
@@ -748,17 +786,29 @@ def main():
     elif sys.version_info >= (3, 13):
         print("✅ Excellent! Running on Python 3.13+ with full compatibility")
     
-    # Check required dependencies
+    # Check required dependencies (MediaPipe optional with OpenCV fallback)
+    missing: list[str] = []
     try:
-        import mediapipe
-        import cv2
-        import PIL
-        print("✅ All required dependencies are available")
-    except ImportError as e:
-        print(f"❌ Missing required dependency: {e}")
+        import cv2 as _cv2  # noqa: F401
+    except Exception:
+        missing.append("opencv-python")
+    try:
+        import PIL  # noqa: F401
+    except Exception:
+        missing.append("pillow")
+    try:
+        import mediapipe  # noqa: F401
+        has_mp = True
+    except Exception:
+        has_mp = False
+    if missing:
+        print(f"❌ Missing required dependency(s): {', '.join(missing)}")
         print("📦 Please install required packages:")
-        print("   pip install mediapipe opencv-python pillow")
+        print("   pip install " + " ".join(missing))
         sys.exit(1)
+    if not has_mp:
+        print("⚠️ MediaPipe not found. Running with OpenCV-only fallback (no tracking).")
+        print("   To enable full tracking later, install mediapipe when Py3.13 wheels are available.")
     
     # Start application
     try:
