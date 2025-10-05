@@ -261,13 +261,16 @@ class MediaPipeKeyboardTester:
                     text=text,
                     width=width,
                     height=2,
-                    font=KEY_FONT,
-                    bg=KEY_COLOR,
-                    fg='white',
-                    relief='raised',
-                    bd=2,
-                    activebackground=KEY_HOVER_COLOR
+                    font=("Consolas", 16, "bold"),
+                    bg="#1E1E1E",          # dark background
+                    fg="#00FF88",          # mint green text
+                    relief="ridge",
+                    borderwidth=2,
+                    activebackground="#2E2E2E",  # slightly lighter gray when active
+                    activeforeground="#00FFAA",  # bright green when pressed
                 )
+
+                
                 btn.pack(side='left', padx=2)
                 self.key_buttons[key] = btn
 
