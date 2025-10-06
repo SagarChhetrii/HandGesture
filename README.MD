@@ -69,6 +69,13 @@ export TK_SILENCE_DEPRECATION=1
 export PKG_CONFIG_PATH=/opt/homebrew/opt/tcl-tk/lib/pkgconfig:${PKG_CONFIG_PATH:-}
 python main.py
 ```
+Option C - 
+```bash
+cd /Users/sagarchhetri/Desktop/HandGesture
+source .venv312/bin/activate
+python main.py
+
+```
 
 🚀 Usage
 

@@ -334,14 +334,15 @@ class HandGestureKeyboard:
                     text=text,
                     width=width,
                     height=2,
-                    font=KEY_FONT,
-                    bg=bg_color,
-                    fg='white',
-                    relief='raised',
-                    bd=2,
-                    activebackground=KEY_HOVER_COLOR,
-                    cursor='hand2'
+                    font=("Consolas", 8, "bold"),
+                    bg="#1E1E1E",          # dark background
+                    fg="#00FF88",          # mint green text
+                    relief="ridge",
+                    borderwidth=2,
+                    activebackground="#2E2E2E",  # slightly lighter gray when active
+                    activeforeground="#00FFAA",  # bright green when pressed
                 )
+
                 btn.pack(side='left', padx=2, pady=1)
                 self.key_buttons[key] = btn
 
